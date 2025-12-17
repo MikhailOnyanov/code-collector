@@ -202,11 +202,11 @@ class TestArgumentParsing(unittest.TestCase):
                 with patch('collect_code.collect_files', return_value=""):
                     with patch('builtins.open', unittest.mock.mock_open()):
                         # Capture the parsed exclude_extensions
-                        original_collect = collect_code.collect_files
                         captured_args = {}
                         
-                        def capture_collect(*args, **kwargs):
-                            captured_args['exclude_extensions'] = args[5] if len(args) > 5 else kwargs.get('exclude_extensions')
+                        def capture_collect(folder_path, exclude_files, exclude_dirs, all_files, 
+                                          include_extensions, exclude_extensions):
+                            captured_args['exclude_extensions'] = exclude_extensions
                             return ""
                         
                         with patch('collect_code.collect_files', side_effect=capture_collect):
@@ -222,8 +222,9 @@ class TestArgumentParsing(unittest.TestCase):
                     with patch('builtins.open', unittest.mock.mock_open()):
                         captured_args = {}
                         
-                        def capture_collect(*args, **kwargs):
-                            captured_args['exclude_extensions'] = args[5] if len(args) > 5 else kwargs.get('exclude_extensions')
+                        def capture_collect(folder_path, exclude_files, exclude_dirs, all_files, 
+                                          include_extensions, exclude_extensions):
+                            captured_args['exclude_extensions'] = exclude_extensions
                             return ""
                         
                         with patch('collect_code.collect_files', side_effect=capture_collect):
@@ -239,8 +240,9 @@ class TestArgumentParsing(unittest.TestCase):
                     with patch('builtins.open', unittest.mock.mock_open()):
                         captured_args = {}
                         
-                        def capture_collect(*args, **kwargs):
-                            captured_args['exclude_extensions'] = args[5] if len(args) > 5 else kwargs.get('exclude_extensions')
+                        def capture_collect(folder_path, exclude_files, exclude_dirs, all_files, 
+                                          include_extensions, exclude_extensions):
+                            captured_args['exclude_extensions'] = exclude_extensions
                             return ""
                         
                         with patch('collect_code.collect_files', side_effect=capture_collect):
