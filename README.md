@@ -16,11 +16,18 @@ A script to collect source code from multiple directories into a single text fil
 ## Installation 🛠️
 
 1. Make sure you have **Python 3.7+** installed 🐍
-2. Clone this repo or copy `collect_code.py` and `setup.py`
-3. Install locally with pip:
+2. Clone this repo or copy the files
+
+### Install with uv (recommended) ⚡
 
 ```bash
-pip install -e .
+uv pip install .
+```
+
+### Install with pip
+
+```bash
+pip install .
 ```
 
 After installation, use the `collect-code` command from anywhere! 🚀
@@ -28,7 +35,7 @@ After installation, use the `collect-code` command from anywhere! 🚀
 ### Optional: Install with pipx (recommended for CLI tools) 🧰
 
 ```bash
-pipx install . --force
+pipx install .
 ```
 
 > 💡 `pipx` ensures isolated, system-wide access to the CLI tool without polluting your global Python environment.
@@ -119,6 +126,14 @@ Results are saved to `collected_code.txt` in your current working directory.
 
 ## Development 🛠️
 
+### Setup Development Environment
+
+Install with uv:
+
+```bash
+uv pip install -e .
+```
+
 Run directly without installation:
 
 ```bash
@@ -139,10 +154,25 @@ Or with pytest (if installed):
 pytest test_collect_code.py -v
 ```
 
+### Code Quality
+
+Format code with ruff:
+
+```bash
+uv tool run ruff format collect_code.py test_collect_code.py
+```
+
+Lint code:
+
+```bash
+uv tool run ruff check collect_code.py test_collect_code.py
+```
+
 The test suite includes:
-- **Unit tests** for the `collect_files` function
+- **Unit tests** for the `collect_files` function with detailed docstrings
 - **Unit tests** for CLI argument parsing
 - **Integration tests** for end-to-end scenarios
+- **Test fixtures** to reduce code duplication
 
 All tests run automatically on every push via GitHub Actions CI/CD pipeline.
 
