@@ -4,9 +4,10 @@ A script to collect source code from multiple directories into a single text fil
 
 ## Features ✨
 
-- Collects `.py` files by default (option to include **all files** 🌐)
+- Collects **Python, Java, C, and C++** files by default (option to include **all files** 🌐)
 - Ignores common directories: `.idea`, `.venv`, `venv`, `__pycache__`, `.env` 🚫
-- Add custom directories to exclude 🛑
+- Add custom directories to exclude with `--exclude` 🛑
+- Exclude specific file types/extensions with `--exclude-langs` 🚷
 - Supports multiple input folders 🗂️
 - Preserves file structure with relative paths 🧭
 - Resilient to file read errors — continues even if some files fail 🔒
@@ -34,7 +35,7 @@ pipx install . --force
 
 ## Usage 🚀
 
-### Collect all `.py` files from one folder:
+### Collect code files from one folder (Python, Java, C, C++ by default):
 
 ```bash
 collect-code ./src
@@ -46,7 +47,7 @@ collect-code ./src
 collect-code ./src ./tests ./utils
 ```
 
-### Collect **all files** (not just `.py`):
+### Collect **all files** (not just default languages):
 
 ```bash
 collect-code ./project --all-files
@@ -56,6 +57,29 @@ collect-code ./project --all-files
 
 ```bash
 collect-code ./src --exclude node_modules build dist
+```
+
+### Exclude specific file types/extensions:
+
+```bash
+# Exclude Python files
+collect-code ./src --exclude-langs=py
+
+# Exclude multiple file types (Java and C++)
+collect-code ./src --exclude-langs=java,cpp,hpp
+
+# Works with or without dots in extension names
+collect-code ./src --exclude-langs=.py,.java
+```
+
+### Combine directory and file-type exclusions:
+
+```bash
+# Exclude 'build' directory and all Java files
+collect-code ./src --exclude build --exclude-langs=java
+
+# Exclude multiple directories and file types
+collect-code ./project --exclude node_modules dist --exclude-langs=cpp,h
 ```
 
 ### Example Output 📄
@@ -85,6 +109,13 @@ Results are saved to `collected_code.txt` in your current working directory.
 - **Dependencies**: Standard library only 🚫📦
 - **License**: MIT 📜
 - **Files**: `collect_code.py`, `setup.py`
+- **Supported Languages by Default**: Python (`.py`), Java (`.java`), C (`.c`, `.h`), C++ (`.cpp`, `.cc`, `.cxx`, `.hpp`)
+
+### Understanding the Flags
+
+- **`--exclude`**: Excludes **directories** from being traversed (e.g., `node_modules`, `build`)
+- **`--exclude-langs`**: Excludes **file types** based on their extensions (e.g., `py`, `java`)
+- **`--all-files`**: Overrides default language filtering and collects all file types (but still respects `--exclude-langs`)
 
 ## Development 🛠️
 
