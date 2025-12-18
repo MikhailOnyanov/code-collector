@@ -1,12 +1,12 @@
 [project]
 name = "collect-code"
-version = "0.2.0"
+version = "1.0.0"
 description = "A CLI tool to collect source code from multiple directories into a single file"
 readme = "README.md"
 requires-python = ">=3.7"
 license = { text = "MIT" }
 authors = [
-    { name = "Onyanov Mikhaik", email = "mihacool3@gmail.com" }
+    { name = "Onyanov Mikhail", email = "mihacool3@gmail.com" }
 ]
 keywords = [
     "code-collection",
@@ -31,9 +31,9 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/MikhailOnyanov/code_collector"
-Repository = "https://github.com/MikhailOnyanov/code_collector"
-Issues = "https://github.com/MikhailOnyanov/code_collector/issues"
+Homepage = "https://github.com/MikhailOnyanov/code_collecter"
+Repository = "https://github.com/MikhailOnyanov/code_collecter"
+Issues = "https://github.com/MikhailOnyanov/code_collecter/issues"
 
 [project.scripts]
 collect-code = "collect_code:main"
