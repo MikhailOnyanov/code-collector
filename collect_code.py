@@ -1,31 +1,42 @@
-import os
 import argparse
 import logging
+import os
 from pathlib import Path
 
 # Configure logging with ISO 8601 datetime format
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
-    datefmt="%Y-%m-%dT%H:%M:%S%z"
+    datefmt="%Y-%m-%dT%H:%M:%S%z",
 )
 logger = logging.getLogger(__name__)
 
 DEFAULT_EXCLUDE_DIRS = {".idea", ".venv", "venv", "__pycache__", ".env"}
+DEFAULT_EXTENSIONS = {".py", ".java", ".c", ".cpp", ".cc", ".cxx", ".h", ".hpp"}
 
 
-def collect_files(folder_path: Path, exclude_files: set, exclude_dirs: set, all_files: bool) -> str:
+def collect_files(
+    folder_path: Path,
+    exclude_files: set,
+    exclude_dirs: set,
+    all_files: bool,
+    include_extensions: set,
+    exclude_extensions: set,
+) -> str:
     """Collects content of files from a directory and its subdirectories.
 
-    By default, only collects .py files. If `all_files` is True, collects all files.
-    Skips files in `exclude_dirs` and files listed in `exclude_files`.
+    By default, collects files with extensions in `include_extensions` (Python, Java, C, C++).
+    If `all_files` is True, collects all files. Files with extensions in `exclude_extensions`
+    are always skipped. Skips files in `exclude_dirs` and files listed in `exclude_files`.
     Handles read errors gracefully by inserting an error message instead of crashing.
 
     Args:
         folder_path (Path): Root directory to start collecting files from.
         exclude_files (set): Set of Path objects representing files to exclude.
         exclude_dirs (set): Set of directory names to skip during traversal.
-        all_files (bool): If True, include all files; if False, only .py files.
+        all_files (bool): If True, include all files; if False, only files with included extensions.
+        include_extensions (set): Set of file extensions to include (e.g., {'.py', '.java'}).
+        exclude_extensions (set): Set of file extensions to exclude (takes precedence).
 
     Returns:
         str: Concatenated string with each file's content prefixed by its relative path
@@ -37,11 +48,17 @@ def collect_files(folder_path: Path, exclude_files: set, exclude_dirs: set, all_
         dirs[:] = [d for d in dirs if d not in exclude_dirs]
 
         for file in files:
-            # Skip non-Python files unless all_files is True
-            if not all_files and not file.endswith(".py"):
+            file_path = Path(root) / file
+            file_ext = file_path.suffix.lower()
+
+            # Skip files with excluded extensions (takes precedence)
+            if file_ext in exclude_extensions:
                 continue
 
-            file_path = Path(root) / file
+            # Skip files not matching included extensions unless all_files is True
+            if not all_files and file_ext not in include_extensions:
+                continue
+
             # Skip explicitly excluded files
             if file_path in exclude_files:
                 continue
@@ -49,7 +66,7 @@ def collect_files(folder_path: Path, exclude_files: set, exclude_dirs: set, all_
             # Compute relative path from the root folder
             rel_path = file_path.relative_to(folder_path)
             try:
-                with open(file_path, "r", encoding="utf-8") as f:
+                with open(file_path, encoding="utf-8") as f:
                     content = f.read()
             except Exception as e:
                 logger.warning(f"Failed to read file {file_path}: {e}")
@@ -68,23 +85,29 @@ def main():
     Excludes the script itself and common system directories by default.
     """
     parser = argparse.ArgumentParser(
-        description="Collect code from multiple directories (.py by default, all files with --all-files)"
+        description="Collect code from multiple directories (Python, Java, C, C++ by default; all files with --all-files)"
     )
     parser.add_argument(
         "folders",
         nargs="+",
-        help="One or more directory paths to collect code from (space-separated)"
+        help="One or more directory paths to collect code from (space-separated)",
     )
     parser.add_argument(
         "--exclude",
         nargs="*",
         default=[],
-        help="Additional directory names to exclude (beyond default: .idea, .venv, venv, __pycache__, .env)"
+        help="Directory names to exclude (beyond default: .idea, .venv, venv, __pycache__, .env)",
+    )
+    parser.add_argument(
+        "--exclude-langs",
+        type=str,
+        default="",
+        help="Comma-separated file extensions to exclude (e.g., 'py,java' or '.py,.java')",
     )
     parser.add_argument(
         "--all-files",
         action="store_true",
-        help="Include all files (not just .py files) in the output"
+        help="Include all files (not just default language files) in the output",
     )
 
     args = parser.parse_args()
@@ -96,6 +119,15 @@ def main():
     # Combine default and user-provided excluded directories
     exclude_dirs = DEFAULT_EXCLUDE_DIRS.union(set(args.exclude))
 
+    # Parse excluded language extensions
+    exclude_extensions = set()
+    if args.exclude_langs:
+        # Split by comma and normalize extensions (add leading dot if missing)
+        raw_extensions = [ext.strip() for ext in args.exclude_langs.split(",")]
+        exclude_extensions = {
+            ext if ext.startswith(".") else f".{ext}" for ext in raw_extensions if ext.strip()
+        }
+
     # Define output file path
     output_file = Path(os.getcwd()) / "collected_code.txt"
     output_content = []
@@ -103,6 +135,7 @@ def main():
     logger.info(f"Starting code collection from {len(args.folders)} directories...")
     logger.debug(f"Excluded directories: {exclude_dirs}")
     logger.debug(f"Excluded files: {exclude_files}")
+    logger.debug(f"Excluded extensions: {exclude_extensions}")
     logger.debug(f"Collecting all files: {args.all_files}")
 
     # Process each provided folder
@@ -114,7 +147,14 @@ def main():
 
         logger.info(f"Processing directory: {folder_path}")
         output_content.append(
-            collect_files(folder_path, exclude_files, exclude_dirs, args.all_files)
+            collect_files(
+                folder_path,
+                exclude_files,
+                exclude_dirs,
+                args.all_files,
+                DEFAULT_EXTENSIONS,
+                exclude_extensions,
+            )
         )
 
     # Write all collected content to output file
