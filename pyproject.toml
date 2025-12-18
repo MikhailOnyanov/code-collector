@@ -6,7 +6,7 @@ readme = "README.md"
 requires-python = ">=3.7"
 license = { text = "MIT" }
 authors = [
-    { name = "Oryanov Mikhail Nikolaevich", email = "mikhail.oryanov@example.com" }
+    { name = "Onyanov Mikhaik", email = "mihacool3@gmail.com" }
 ]
 keywords = [
     "code-collection",
